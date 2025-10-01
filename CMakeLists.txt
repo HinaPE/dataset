@@ -20,6 +20,7 @@ FetchContent_Declare(simdjson
         URL https://github.com/simdjson/simdjson/archive/refs/tags/v4.0.6.tar.gz
 )
 FetchContent_MakeAvailable(simdjson)
+target_link_libraries(dataset PUBLIC simdjson::simdjson)
 
 set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(ZLIB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -27,11 +28,11 @@ FetchContent_Declare(zlib
         URL https://zlib.net/zlib-1.3.1.tar.gz
 )
 FetchContent_MakeAvailable(zlib)
-if(MSVC)
+if (MSVC)
     set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/zlibstatic.lib" CACHE FILEPATH "" FORCE)
-else()
+else ()
     set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/libz.a" CACHE FILEPATH "" FORCE)
-endif()
+endif ()
 set(ZLIB_LIBRARIES "${ZLIB_LIBRARY}" CACHE STRING "" FORCE)
 set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR};${zlib_BINARY_DIR}" CACHE STRING "" FORCE)
 set(ZLIB_FOUND TRUE CACHE BOOL "" FORCE)
@@ -55,6 +56,7 @@ FetchContent_Declare(libspng
         URL https://github.com/randy408/libspng/archive/refs/tags/v0.7.4.tar.gz
 )
 FetchContent_MakeAvailable(libspng)
+target_link_libraries(dataset PUBLIC spng_static)
 
 set(OPENEXR_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
 set(OPENEXR_INSTALL_TOOLS OFF CACHE BOOL "" FORCE)
@@ -66,7 +68,22 @@ FetchContent_Declare(openexr
         URL https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.4.0.tar.gz
 )
 FetchContent_GetProperties(openexr)
-if(NOT openexr_POPULATED)
+if (NOT openexr_POPULATED)
     FetchContent_Populate(openexr)
     add_subdirectory(${openexr_SOURCE_DIR} ${openexr_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+endif ()
+target_link_libraries(dataset PUBLIC OpenEXR::OpenEXR)
+
+set(TBB_TEST OFF CACHE BOOL "" FORCE)
+set(TBB_STRICT OFF CACHE BOOL "" FORCE)
+set(_OLD_LOG_LEVEL "${CMAKE_MESSAGE_LOG_LEVEL}")
+set(CMAKE_MESSAGE_LOG_LEVEL "ERROR")
+FetchContent_Declare(oneTBB
+        URL https://github.com/uxlfoundation/oneTBB/archive/refs/tags/v2022.2.0.tar.gz
+        DOWNLOAD_EXTRACT_TIMESTAMP OFF)
+FetchContent_MakeAvailable(oneTBB)
+set(CMAKE_MESSAGE_LOG_LEVEL "${_OLD_LOG_LEVEL}")
+if (NOT TARGET TBB::tbb AND TARGET tbb)
+    add_library(TBB::tbb ALIAS tbb)
+endif ()
+target_link_libraries(dataset PRIVATE TBB::tbb)

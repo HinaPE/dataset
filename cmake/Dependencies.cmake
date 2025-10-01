@@ -1,0 +1,19 @@
+include_guard(GLOBAL)
+
+find_package(Threads REQUIRED)
+
+include(${CMAKE_CURRENT_LIST_DIR}/FetchSimdjson.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FetchZlib.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FetchLibDeflate.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FetchLibSpng.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FetchOpenEXR.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FetchTBB.cmake)
+
+function(dataset_link_thirdparty target)
+    if(NOT TARGET ${target})
+        message(FATAL_ERROR "Missing target: ${target}")
+    endif()
+    target_link_libraries(${target}
+        PRIVATE simdjson::simdjson spng_static OpenEXR::OpenEXR TBB::tbb
+    )
+endfunction()

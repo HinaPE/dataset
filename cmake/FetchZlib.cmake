@@ -1,0 +1,20 @@
+if(TARGET zlibstatic OR TARGET zlib)
+    return()
+endif()
+
+include(FetchContent)
+
+set(ZLIB_VERSION 1.3.1 CACHE STRING "zlib version")
+set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(ZLIB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(zlib URL https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz)
+FetchContent_MakeAvailable(zlib)
+
+if(MSVC)
+    set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/zlibstatic.lib" CACHE FILEPATH "" FORCE)
+else()
+    set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/libz.a" CACHE FILEPATH "" FORCE)
+endif()
+set(ZLIB_LIBRARIES "${ZLIB_LIBRARY}" CACHE STRING "" FORCE)
+set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR};${zlib_BINARY_DIR}" CACHE STRING "" FORCE)
+set(ZLIB_FOUND TRUE CACHE BOOL "" FORCE)

@@ -18,5 +18,7 @@ if(NOT libspng_POPULATED)
         target_link_libraries(spng_static PUBLIC ${ZLIB_LIBRARIES})
     endif()
     target_compile_definitions(spng_static PRIVATE SPNG_USE_ZLIB)
+    # Propagate SPNG_STATIC to consumers so headers don't use dllimport with static lib
+    target_compile_definitions(spng_static INTERFACE SPNG_STATIC)
     set_target_properties(spng_static PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()

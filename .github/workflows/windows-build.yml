@@ -15,6 +15,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up MSVC (x64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Install Ninja
         shell: pwsh
         run: |
@@ -24,7 +29,7 @@ jobs:
       - name: Configure (Release)
         shell: pwsh
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
 
       - name: Build
         shell: pwsh
@@ -36,4 +41,3 @@ jobs:
         shell: pwsh
         run: |
           .\build\dataset_cli.exe --help
-

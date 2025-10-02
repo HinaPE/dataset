@@ -1,0 +1,39 @@
+name: Windows Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Ninja
+        shell: pwsh
+        run: |
+          choco install ninja -y
+          ninja --version
+
+      - name: Configure (Release)
+        shell: pwsh
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        shell: pwsh
+        run: |
+          cmake --build build --config Release
+
+      - name: Smoke test (help)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          .\build\dataset_cli.exe --help
+

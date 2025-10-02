@@ -1,6 +1,6 @@
-if(TARGET simdjson::simdjson)
+if (TARGET simdjson::simdjson)
     return()
-endif()
+endif ()
 
 include(FetchContent)
 

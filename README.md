@@ -1,8 +1,8 @@
 dataset — Portable dataset packer and reader (C++/CLI)
 
-[![Windows](https://github.com/OWNER/REPO/actions/workflows/windows-build.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/windows-build.yml)
-[![Linux](https://github.com/OWNER/REPO/actions/workflows/linux-build.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/linux-build.yml)
-[![macOS](https://github.com/OWNER/REPO/actions/workflows/macos-build.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/macos-build.yml)
+[![Windows](https://github.com/HinaPE/dataset/actions/workflows/windows-build.yml/badge.svg)](https://github.com/HinaPE/dataset/actions/workflows/windows-build.yml)
+[![Linux](https://github.com/HinaPE/dataset/actions/workflows/linux-build.yml/badge.svg)](https://github.com/HinaPE/dataset/actions/workflows/linux-build.yml)
+[![macOS](https://github.com/HinaPE/dataset/actions/workflows/macos-build.yml/badge.svg)](https://github.com/HinaPE/dataset/actions/workflows/macos-build.yml)
 
 Overview
 - dataset builds a compact “hostpack” file from a NeRF Synthetic dataset (e.g., lego), and provides a small C++ API to read frames, camera parameters, and scene metadata.

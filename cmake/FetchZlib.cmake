@@ -19,29 +19,23 @@ else()
         add_library(ZLIB::ZLIB ALIAS zlib)
     endif()
 endif()
-# Provide legacy FindZLIB variables so subprojects (libspng) succeed without system zlib
-if(MSVC)
+# Provide legacy FindZLIB variables only for consumers that still look them up
+if(MSVC AND NOT CMAKE_GENERATOR MATCHES "Ninja")
     set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/$<CONFIG>/zlibstatic$<$<CONFIG:Debug>:d>.lib" CACHE STRING "" FORCE)
 else()
-    set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/libz.a" CACHE STRING "" FORCE)
+    # single-config generators (e.g. Ninja) put the lib directly in binary dir
+    if(TARGET zlibstatic)
+        set(_ZLIB_CANDIDATE "${zlib_BINARY_DIR}/zlibstatic.lib")
+    elseif(TARGET zlib)
+        set(_ZLIB_CANDIDATE "${zlib_BINARY_DIR}/libz.a")
+    endif()
+    if(_ZLIB_CANDIDATE AND EXISTS "${_ZLIB_CANDIDATE}")
+        set(ZLIB_LIBRARY "${_ZLIB_CANDIDATE}" CACHE STRING "" FORCE)
+    else()
+        # fallback (may still be generated later, acceptable as very few consumers use this now)
+        set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/zlibstatic.lib" CACHE STRING "" FORCE)
+    endif()
 endif()
 set(ZLIB_LIBRARIES "${ZLIB_LIBRARY}" CACHE STRING "" FORCE)
 set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR};${zlib_BINARY_DIR}" CACHE STRING "" FORCE)
 set(ZLIB_FOUND TRUE CACHE BOOL "" FORCE)
-# Ensure zlib* is part of SPNGTargets export set to satisfy libspng install(EXPORT)
-if((TARGET zlibstatic OR TARGET zlib) AND NOT DEFINED _DATASET_ZLIB_EXPORT_ADDED)
-    set(_DATASET_ZLIB_EXPORT_ADDED TRUE CACHE INTERNAL "")
-    include(GNUInstallDirs)
-    if(TARGET zlibstatic)
-        install(TARGETS zlibstatic EXPORT SPNGTargets
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-    endif()
-    if(TARGET zlib AND NOT TARGET zlibstatic)
-        install(TARGETS zlib EXPORT SPNGTargets
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-    endif()
-endif()

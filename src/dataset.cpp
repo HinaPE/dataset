@@ -194,17 +194,11 @@ namespace dataset
                 return false;
             }
             std::string s((std::istreambuf_iterator<char>(fi)), std::istreambuf_iterator<char>());
-            simdjson::ondemand::parser parser;
-            auto doc = parser.iterate(s);
-            auto obj = doc.get_object();
+            // Use DOM parser here for robustness
+            simdjson::dom::parser dparser;
+            simdjson::dom::element ddoc = dparser.parse(s);
             out = NSMeta{};
-            if (obj.find_field("w").error() == simdjson::SUCCESS) out.w = int(double(obj["w"]));
-            if (obj.find_field("h").error() == simdjson::SUCCESS) out.h = int(double(obj["h"]));
-            if (obj.find_field("fl_x").error() == simdjson::SUCCESS) out.fx = float(double(obj["fl_x"]));
-            if (obj.find_field("fl_y").error() == simdjson::SUCCESS) out.fy = float(double(obj["fl_y"]));
-            if (obj.find_field("cx").error() == simdjson::SUCCESS) out.cx = float(double(obj["cx"]));
-            if (obj.find_field("cy").error() == simdjson::SUCCESS) out.cy = float(double(obj["cy"]));
-            auto arr = obj.find_field("frames").get_array();
+            auto arr = ddoc["frames"].get_array();
             for (auto v : arr)
             {
                 auto fo = v.get_object();
@@ -213,22 +207,23 @@ namespace dataset
                 fs::path full = fs::path(root) / rel;
                 if (full.extension().empty()) full.replace_extension(".png");
                 it.path = full.string();
-                auto tm = fo["transform_matrix"].get_array();
+                // transform_matrix is a 4x4 nested array
+                auto tm_rows = fo["transform_matrix"].get_array();
                 int r = 0;
-                int c = 0;
-                for (auto x : tm)
+                for (auto row : tm_rows)
                 {
-                    double d = x.get_double();
-                    if (r < 3 && c < 4) it.T[r * 4 + c] = float(d);
-                    r++;
-                    if (r == 4)
+                    int c = 0;
+                    for (auto x : row.get_array())
                     {
-                        r = 0;
+                        double d = x.get_double();
+                        if (r < 3 && c < 4) it.T[r * 4 + c] = float(d);
                         c++;
                     }
+                    r++;
                 }
                 out.items.push_back(std::move(it));
             }
+            
             return true;
         }
     }
@@ -310,7 +305,8 @@ namespace dataset
                 }
             }
         };
-
+        // Reserve space for header at the beginning
+        fo.seekp(sizeof(Hdr), std::ios::beg);
         align_block(cfg.block_align);
         hdr.scene_off = (uint64_t)fo.tellp();
         SceneRec scene{};

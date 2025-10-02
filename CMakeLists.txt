@@ -17,18 +17,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(cmake/Dependencies.cmake)
 dataset_link_thirdparty(dataset)
 
-include(GNUInstallDirs)
-install(TARGETS dataset
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-if(WIN32)
-  set(_DATASET_RUNTIME_CANDIDATES TBB::tbb OpenEXR::OpenEXR OpenEXR::IlmThread OpenEXR::Iex OpenEXR::OpenEXRCore OpenEXR::OpenEXRUtil openjph zlib)
-  foreach(t IN LISTS _DATASET_RUNTIME_CANDIDATES)
-    if(TARGET ${t})
-      install(FILES $<$<OR:$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,SHARED_LIBRARY>,$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,MODULE_LIBRARY>>:$<TARGET_FILE:${t}>> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
-    endif()
-  endforeach()
+option(BUILD_CLI "Build dataset CLI executable" ON)
+if(BUILD_CLI)
+  add_executable(dataset_cli main.cpp)
+  target_link_libraries(dataset_cli PRIVATE dataset)
+  if (WIN32)
+    add_custom_command(TARGET dataset_cli POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:dataset_cli> $<TARGET_FILE_DIR:dataset_cli> COMMAND_EXPAND_LISTS)
+  endif()
 endif()

@@ -10,6 +10,7 @@ set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE BOOL "" FORCE)
 
 file(GLOB_RECURSE DATASET_SRC CONFIGURE_DEPENDS include/*.h src/*.cpp)
 add_library(dataset STATIC ${DATASET_SRC})
+add_library(dataset::dataset ALIAS dataset)
 set_target_properties(dataset PROPERTIES EXPORT_NAME dataset)
 target_include_directories(dataset PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
